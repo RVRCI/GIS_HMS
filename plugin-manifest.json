@@ -1,0 +1,15 @@
+{
+  "service": "CREATOR",
+  "cspDomains": {
+    "connect-src": [
+      "wss://*.zohopublic.com",
+      "https://*.zoho.com",
+      "https://*.zohopublic.com",
+      "https://js.zohostatic.com",
+      "https://maps.googleapis.com",
+      "https://*.sigmausercontent.com",
+      "https://127.0.0.1:5000"
+    ]
+  },
+  "config": []
+}

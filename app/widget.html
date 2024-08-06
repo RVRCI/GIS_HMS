@@ -1,0 +1,1079 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GIS - Maple</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+  <script src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+      <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.3.0/turf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@google/markerclusterer@1.0.1/dist/markerclusterer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsts/dist/jsts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/togeojson@0.15.0/togeojson.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-marker-with-label@2.0.0/dist/markerwithlabel.min.js"></script>
+
+ <style>
+    /* Google fonts(Poppins) */
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      /* Change to right */
+      height: 50%;
+      width: 260px;
+      background-color: #272D83;
+      z-index: 100;
+      transition: all 0.5s ease;
+    }
+
+    .sidebar.close {
+      width: 78px;
+    }
+
+    .sidebar .logo {
+      height: 60px;
+      display: flex;
+      width: 100%;
+      align-items: center;
+    }
+
+    .sidebar .logo i {
+      font-size: 30px;
+      color: #fff;
+      height: 50px;
+      min-width: 78px;
+      text-align: center;
+      line-height: 50px;
+    }
+
+    .sidebar .logo .logo-name {
+      font-size: 22px;
+      color: #fff;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      transition-delay: 0.1s;
+    }
+
+    .sidebar.close .logo .logo-name {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sidebar .nav-list {
+      height: 100%;
+      padding: 35px 30px 0 0;
+      overflow: auto;
+    }
+
+    .sidebar.close .nav-list {
+      overflow: visible;
+    }
+
+    .sidebar .nav-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .sidebar .nav-list li {
+      position: relative;
+      list-style: none;
+      transition: all 0.4s ease;
+    }
+
+    .sidebar .nav-list li .icon-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar.close .nav-list li .icon-link {
+      display: block;
+    }
+
+    .sidebar .nav-list li i {
+      height: 50px;
+      min-width: 78px;
+      text-align: center;
+      line-height: 50px;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar.close .nav-list li i.arrow {
+      display: none;
+    }
+
+    .sidebar .nav-list li.show i.arrow {
+      transform: rotate(-180deg);
+    }
+
+    .sidebar .nav-list li a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .sidebar .nav-list li a .link-name {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 400;
+      transition: all 0.4s ease;
+      text-align: center;
+    }
+
+    .sidebar.close .nav-list li a .link-name {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+
+
+
+    .sidebar .nav-list li.show .sub-menu {
+      display: block;
+
+    }
+
+    .sidebar.close .nav-list li .sub-menu {
+      position: absolute;
+      right: 100%;
+      top: -10px;
+      margin-top: 0;
+      padding: 10px 25px;
+      border-radius: 6px 0 0 6px;
+      opacity: 0;
+      display: block;
+      pointer-events: none;
+      transition: 0s;
+    }
+
+    .sidebar.close .nav-list li:hover .sub-menu {
+      top: 0;
+      opacity: 1;
+      pointer-events: auto;
+      transition: all 0.4s ease;
+    }
+
+    .sidebar .nav-list li .sub-menu a {
+
+      color: #272D83;
+      font-size: 14px;
+      padding: 5px 25px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 1;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      /* align items in a row */
+    }
+
+    .sidebar .nav-list li .sub-menu a:hover {
+      opacity: 1;
+
+    }
+
+    .sidebar .nav-list li .sub-menu .link-name {
+      display: none;
+    }
+
+    .sidebar.close .nav-list li .sub-menu .link-name {
+      font-size: 18px;
+      opacity: 1;
+      display: block;
+    }
+
+    .sidebar .nav-list li .sub-menu.blank {
+      padding: 3px 20px 6px 16px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sidebar .nav-list li:hover .sub-menu.blank {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .home-section {
+      position: relative;
+      height: 100vh;
+      width: calc(100% - 50px);
+      left: 0;
+      background-color: #3a3a3a;
+      transition: all 0.5s ease;
+    }
+
+    .sidebar.close~.home-section {
+      left: 72px;
+      width: calc(100% - 78px);
+    }
+
+    .home-section .home-content {
+      display: flex;
+      height: 60px;
+      align-items: center;
+    }
+
+    .home-section .home-content i,
+    .home-section .home-content .text {
+      color: #ffffff;
+      font-size: 35px;
+    }
+
+    .home-section .home-content i {
+      margin: 0 15px;
+      cursor: pointer;
+    }
+
+    .home-section .home-content .text {
+      white-space: nowrap;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+
+    .space {
+      padding-top: 10px;
+    }
+
+    .listname {
+      margin-top: 15px;
+      font-size: 15px;
+      font-weight: 500;
+      /* letter-spacing: 1px; */
+
+    }
+
+    @media (max-width: 400px) {
+      .sidebar.close .nav-list li .sub-menu {
+        display: none;
+      }
+
+      .sidebar {
+        width: 78px;
+      }
+
+      .sidebar.close {
+        width: 0;
+      }
+
+      .home-section {
+        left: 78px;
+        width: calc(100% - 78px);
+        z-index: 100;
+      }
+
+      .sidebar.close~.home-section {
+        width: 100%;
+        left: 0;
+      }
+    }
+
+    .map-section {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      /* Ensure the map is behind other content */
+    }
+
+    /* Adjust other sections to accommodate the map */
+    .home-section {
+      z-index: 1;
+      /* Ensure the home section is above the map */
+    }
+
+    .sidebar {
+      z-index: 2;
+      /* Ensure the sidebar is above the map */
+    }
+
+    .sub-menu {
+      border: none;
+      background-color: transparent;
+      color: inherit;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .sub-menu option {
+      color: #000;
+      font-size: 16px;
+
+    }
+
+    .sidebar .nav-list li .sub-menu {
+      padding: 12px 250px 14px 28px;
+      background: #fff;
+      display: none;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      /* Add this line */
+    }
+
+    .sidebar .nav-list li .sub-menu1 {
+      padding: 12px 237px 14px 28px;
+      background: #fff;
+      display: none;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      /* Add this line */
+    }
+
+    .sidebar .nav-list li .sub-menu label {
+      display: inline-block;
+      /* Add this line */
+      font-size: 15.4px;
+      font-weight: 600;
+      color: #000;
+
+    }
+
+    .sidebar .nav-list li .sub-menu input[type="checkbox"] {
+      display: inline-block;
+      /* Add this line */
+      margin-right: 15px;
+      /* Add this line to provide spacing between checkbox and label */
+    }
+
+
+
+    .switch {
+      align-items: end;
+      position: relative;
+      display: inline-block;
+      width: 35px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 4px;
+      bottom: 3px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider {
+      background-color: #2196F3;
+    }
+
+    input:focus+.slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked+.slider:before {
+      -webkit-transform: translateX(13px);
+      -ms-transform: translateX(13px);
+      transform: translateX(13px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    .sidebar .nav-list li .sub-menu {
+      padding: 10px 28px -1px;
+      /* Adjust padding as needed */
+      background: #fff;
+      display: none;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      max-height: 330px;
+      /* Set a maximum height */
+      overflow-y: auto;
+      /* Enable vertical scroll */
+      overflow-x: auto;
+      /* Disable horizontal scroll */
+    }
+
+    /* Optional: Adjust scrollbar styles */
+    .sidebar .nav-list li .sub-menu::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    .sidebar .nav-list li .sub-menu::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .sidebar .nav-list li .sub-menu::-webkit-scrollbar-thumb {
+      background: #c9c9c9;
+    }
+
+    .sidebar .nav-list li .sub-menu::-webkit-scrollbar-thumb:hover {
+      background: #2196F3;
+    }
+
+
+    label {
+      font-family: sans-serif;
+      font-size: 1rem;
+      padding-right: 10px;
+    }
+
+    select {
+      margin-top: 18px;
+      font-size: 0.9rem;
+      padding: 2px 5px;
+      width: 130px;
+    }
+
+    .Fromdate {
+      margin-top: 15px;
+      /* margin-left: 19px; */
+      width: 120px;
+    }
+
+    .Todate {
+      margin-top: 15px;
+      margin-left: 19px;
+      width: 120px;
+    }
+
+    .clear {
+
+      padding: 3px;
+      width: 90px;
+      border-radius: 5px;
+      background-color: red;
+      color: #fff;
+      border: none;
+      height: 30px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .submit {
+      padding: 3px;
+      width: 90px;
+      border-radius: 5px;
+      background-color: rgb(6, 143, 29);
+      color: #fff;
+      border: none;
+      height: 30px;
+      cursor: pointer;
+    }
+
+
+.date-picker-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.date-label {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.custom-date-picker {
+  font-size: 16px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.custom-date-picker:hover {
+  border-color: #888;
+}
+
+.custom-date-picker:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+#Date_Range {
+  font-size: 12px;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(86, 86, 86);
+  top: 75px;
+  position: absolute;
+  margin-left: 10px;
+  height: 55px;
+  width: 169px;
+  background: white;
+  z-index: 5;
+  text-align: center;
+  box-shadow: rgb(0 0 0 / 30%) 0px 1px 4px -1px;
+  border-radius: 5px;
+  background-color: rgb(255, 255, 255);
+}
+#From_date, #To_date {
+  display: flex;
+  
+  margin-left: 5px;
+  font-weight: bold;
+  /* padding: 5px 2px 2px 2px */
+}
+#From_date{
+  margin-top: 5px;
+}
+#To_date{
+  margin-top: 0px;
+  padding-top: 5px;
+}
+
+#From_date label,#To_date label {
+  padding-top: 0px;
+  /* margin-top: -6px; */
+}
+
+#Tdate{
+  margin-top: 1px;
+  padding-left: 7px;
+}
+#Fdate{
+  margin-top: 1px;
+  margin-left: -7px;
+}
+#Tdate,#Fdate{
+  font-weight: normal;
+}
+.chainage{
+      /* background-color: green !important; */
+      position: absolute;
+      /* z-index: 999; */
+      top: 15px;
+      min-width: 200px;
+    }
+    table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+  th, td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: left;
+}
+  </style>
+</head>
+<body>
+<div style="text-align: center; color:  #272D83; font-weight: 600;">Maple GIS Visualization</div>
+<!-- <div id="date-controls">
+  <label for="map-start-date" class="listname">From Date: </label>
+  <input type="date" class="date-input" id="map-start-date" />
+
+  <label for="map-end-date" class="listname">To Date: </label>
+  <input type="date" class="date-input" id="map-end-date" />
+</div> -->
+  <div id="map"></div>
+  <div id="data-container">
+      <!-- Your data elements go here -->
+      <!-- <span id="data-span">This is RCI Map data</span> -->
+  </div>
+  <div id="Date_Range">
+    <div id="From_date">
+    <label>From Date:</label>
+    <p id ="Fdate"></label>
+    </div>
+    <div id="To_date">
+    <label>To Date:</label>
+    <p id ="Tdate"></label>
+    </div>
+</div>
+  <div class="sidebar close">
+    <!-- <div class="logo">
+      <i class="fa-sharp fa-solid fa-caret-left"></i>
+      <span class="logo-name">GIS</span>
+    </div> -->
+
+    <ul class="nav-list">
+      <li>
+        <div class="icon-link">
+          <a href="#">
+            <i class="fab fa-codepen"></i>
+            <span class="link-name">Legends</span>
+          </a>
+          <i class="fas fa-caret-down arrow"></i>
+        </div>
+
+        <ul class="sub-menu">
+          <li><a href="#" class="link-name">Legends</a></li>
+          <div id="legend-items">
+            <!-- Legend items will be appended here by JavaScript -->
+          </div>        
+        </ul>
+      </li>
+      <li>
+        <div class="icon-link">
+          <a href="#">
+            <i class="fab fa-centos"></i>
+            <span class="link-name">Work zone</span>
+          </a>
+          <i class="fas fa-caret-down arrow"></i>
+        </div>
+
+        <ul class="sub-menu">
+          <li><a href="#" class="link-name">Work zone</a></li>
+          <div>
+            <label class="switch">
+              <input type="checkbox" id="workzone">
+              <span class="slider"></span>
+            </label>
+            <span class="listname">Show Workzone</span>&nbsp &nbsp &nbsp &nbsp&nbsp         
+            <!-- Legend items will be appended here by JavaScript -->
+          </div>        
+        </ul>
+      </li>
+
+      <li>
+        <div class="icon-link">
+            <a href="#">
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                <span class="link-name">HA</span>
+            </a>
+            <i class="fas fa-caret-down arrow"></i>
+          </div> 
+             <ul class="sub-menu">
+
+            <li>
+                <a href="#" class="link-name" style=" background-color: #272D83; color: #fff;">Historic
+                    Analysis</a>
+            </li>
+
+            <li class="space">
+
+
+                <label>Category : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <select id="category-select">
+                  <option>Select</option>
+                  <option>Defect</option>
+                </select>
+                <br>
+                <label>Asset Group : &nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <select id="asset-group-select">
+                  <option>Select</option>
+                </select>
+                <br>
+                <label>Asset Category : &nbsp&nbsp&nbsp&nbsp&nbsp</label>
+                <select id="asset-category-select">
+                  <option>Select</option>
+                </select>
+                <br>
+                <label for="duration" class="listname">Duration :</label>
+                <select id="duration" class="custom-dropdown">
+                  <option>Select</option>
+                    <option value="1_month">Past 1 Month</option>
+                    <option value="3_month">Past 3 Month</option>
+                    <option value="6_month">Past 6 Month</option>
+                </select>
+            </li>
+       
+            <li class="space">
+              <label class="listname" for="enable-calendar">Calendar</label>
+              <input type="checkbox" id="enable-calendar" style="margin-left: 5px;" onclick="toggleDateFields()" /> 
+              <div>
+
+                <label for="start-date" class="listname">From Date : </label>
+                <input type="date" class="Fromdate" id="start-date" disabled />
+              </div>
+
+              <div class="end-date">
+                <label for="end-date" class="listname">To Date :</label>
+                <input type="date" class="Todate" id="end-date" disabled />
+              </div>
+
+            </li>
+            
+          
+
+            <li class="space" style="display: flex; justify-content: space-evenly; margin-top: 15px;">
+              <button class="submit" id="bt-submit">Submit</button>
+              <button class="clear" id="bt-clear">Clear</button>
+            </li>          
+            <table id="defect-table">
+              <thead>
+                
+                  <tr>
+                      <th>Ticket No</th>
+                      <th>Chainage</th>
+                      <th>Type</th>
+                      <th>Chainage To</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <!-- Rows will be added here dynamically -->
+              </tbody>
+          </table>
+
+
+        </ul>
+
+    </li>
+    </ul>
+        </div>
+</div>
+
+
+
+
+<script>
+  function toggleDateFields() {
+      const calendarCheckbox = document.getElementById('enable-calendar');
+      const startDateField = document.getElementById('start-date');
+      const endDateField = document.getElementById('end-date');
+      const durationDropdown = document.getElementById('duration');
+
+      if (calendarCheckbox.checked) {
+        startDateField.disabled = false;
+        endDateField.disabled = false;
+        durationDropdown.disabled = true;
+      } else {
+        startDateField.disabled = true;
+        endDateField.disabled = true;
+        durationDropdown.disabled = false;
+      }
+    }
+
+
+
+</script>
+<script>
+  let btn = document.querySelector(".fa-caret-left");
+  let sidebar = document.querySelector(".sidebar");
+
+  btn.addEventListener("click", () => {
+    sidebar.classList.toggle("close");
+  });
+
+  let arrows = document.querySelectorAll(".arrow");
+  for (var i = 0; i < arrows.length; i++) {
+    arrows[i].addEventListener("click", (e) => {
+      let arrowParent = e.target.parentElement.parentElement;
+      arrowParent.classList.toggle("show");
+    });
+  }
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD0Pk4uCF400OIH8yBseuk40aqJuZvop2M&libraries=geometry&v=weekly&region=IN" defer></script>
+<script type="text/javascript" src="ConfigData.js"></script>
+<script type="module" crossorigin src="index.js"></script>
+<link rel="stylesheet" href="./style.css" />
+<script src="https://unpkg.com/google-maps-path-overlay"></script> 
+<script>
+
+
+
+
+var recordArrAssetsImage;
+ZOHO.CREATOR.init().then(function () {
+  var Assetsimage = {
+    reportName: "Assets_category_and_sub_category_master_Report",
+    page: 1,
+    pageSize: 200
+  };
+
+  ZOHO.CREATOR.API.getAllRecords(Assetsimage).then(function (responseAssetsimage) {
+    recordArrAssetsImage = responseAssetsimage.data;  
+
+    for (var i = 0; i < recordArrAssetsImage.length; i++) {
+      var apiAssetImage = recordArrAssetsImage[i]['Image'];
+      // Split the URL to get the filepath
+      var parts = apiAssetImage.split('/');
+      var partsFilepath = apiAssetImage.split('?filepath=');
+      var downloadUrl = 'https://creatorexport.zoho.in/file/rcidmaplehwmis/highway-maintenance-system/Assets_category_and_sub_category_master_Report/' + parts[7] + '/Image/image-download?filepath=/' + partsFilepath[1];
+
+      var side = recordArrAssetsImage[i]['Level1'] && recordArrAssetsImage[i]['Level1']['display_value'] ? recordArrAssetsImage[i]['Level1']['display_value'] : "";
+
+      var category = recordArrAssetsImage[i]['Asset_Category']['display_value'];
+      var assetSubcategory = recordArrAssetsImage[i]['Asset_Sub_Category']['display_value'];
+      var alt = category + (side ? " / " + side : "");
+
+      const li = document.createElement('li');
+      li.className = 'space';
+      li.innerHTML = `
+        <label class="switch">
+          <input type="checkbox" id="switch-${i}" data-category="${category}" data-side="${side}" data-subcategory="${assetSubcategory}">
+          <span class="slider"></span>
+        </label>
+        <img src="${downloadUrl}" alt="${alt}" style="height: 20px;width: 20px;">
+        &nbsp &nbsp <span class="listname">${alt}</span>
+      `;
+
+      document.getElementById('legend-items').appendChild(li);
+
+      
+
+      // Add event listener to the checkbox
+      const checkbox = li.querySelector(`#switch-${i}`);
+      checkbox.addEventListener('change', (event) => {
+        const selectedCategory = event.target.getAttribute('data-category');
+        const selectedSide = event.target.getAttribute('data-side');
+        const subCategory = event.target.getAttribute('data-subcategory');
+        const sideInfo = selectedSide ? ` / ${selectedSide}` : '';
+        const isChecked = event.target.checked;
+      //  console.log(`Switch ${selectedCategory}${sideInfo} toggled. Checked: ${event.target.checked}`);
+         // Call the function from index.js
+         if (typeof handleToggle === 'function') {
+          handleToggle(selectedCategory, selectedSide, isChecked,subCategory);
+        } else {
+          console.error('handleToggle function is not defined.');
+        }
+      });
+    }
+  });
+
+  var recordArrAssetsGroup;
+  var AssetsGroup = {
+    reportName: "AssetGroup_Report",
+    criteria: "(Asset_Types.Asset_Type == \"Civil\")",
+    page: 1,
+    pageSize: 200
+  };
+
+  ZOHO.CREATOR.API.getAllRecords(AssetsGroup).then(function (responseAssetsGroup) {
+  recordArrAssetsGroup = responseAssetsGroup.data;
+  var assetGroupArr = [];
+  for (var i = 0; i < recordArrAssetsGroup.length; i++) {
+    var recordAssetGrp = recordArrAssetsGroup[i]['Asset_Group'];
+    assetGroupArr.push(recordAssetGrp);
+  }
+    // Add 'All' to the asset group array
+    assetGroupArr.unshift('All');
+
+  document.getElementById('category-select').addEventListener('change', function() {
+    var category = this.value;
+    var assetGroupSelect = document.getElementById('asset-group-select');
+
+    // Clear existing options
+    assetGroupSelect.innerHTML = '';
+
+    // Add the default "Select" option
+    var defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.innerHTML = 'Select';
+    assetGroupSelect.appendChild(defaultOption);
+
+    // Define asset group options based on category
+    var options = [];
+    if (category === 'Defect' || category === 'All') {
+      options = assetGroupArr;
+    } else {
+      options = ['All'];
+    }
+
+    // Populate asset group options
+    options.forEach(function(option) {
+      var opt = document.createElement('option');
+      opt.value = option;
+      opt.innerHTML = option;
+      assetGroupSelect.appendChild(opt);
+    });
+  });
+});
+
+var recordArrAssetsCategory;
+var AssetsCategory = {
+  reportName: "AssetCategory_Report",
+  page: 1,
+  pageSize: 200
+};
+
+ZOHO.CREATOR.API.getAllRecords(AssetsCategory).then(function (responseAssetsCategory) {
+  recordArrAssetsCategory = responseAssetsCategory.data;
+  
+  document.getElementById('asset-group-select').addEventListener('change', function() {
+    var group = this.value;
+    var assetCategorySelect = document.getElementById('asset-category-select');
+
+    // Clear existing options
+    assetCategorySelect.innerHTML = '';
+
+    // Add the default "Select" option
+    var defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.innerHTML = 'Select';
+    assetCategorySelect.appendChild(defaultOption);
+
+    var finalAssetCategory = [];
+
+    // Filter asset categories based on the selected group
+    for (var i = 0; i < recordArrAssetsCategory.length; i++) {
+      if (recordArrAssetsCategory[i]['Asset_GroupNew']['display_value'] == group) {
+        var temp = recordArrAssetsCategory[i]['Asset_Category'];
+        finalAssetCategory.push(temp);
+      }
+    }
+
+    // Add 'All' to the asset category array
+    finalAssetCategory.unshift('All');
+
+    // Populate asset category options
+    finalAssetCategory.forEach(function(option) {
+      var opt = document.createElement('option');
+      opt.value = option;
+      opt.innerHTML = option;
+      assetCategorySelect.appendChild(opt);
+    });
+
+    // Set the value to 'All' by default if no group is selected
+    if (group === '') {
+      assetCategorySelect.value = 'All';
+    }
+  });
+});
+
+var selectedStartDate;
+    var selectedEndDate;
+    var startDate;
+    var endDate;
+
+    document.getElementById('start-date').addEventListener('change', function() {
+      selectedStartDate = this.value;
+      var inputDate = new Date(selectedStartDate);
+      selectedStartDate = formatDate(inputDate);
+    });
+
+    document.getElementById('end-date').addEventListener('change', function() {
+      selectedEndDate = this.value;
+      var inputDate = new Date(selectedEndDate);
+      selectedEndDate = formatDate(inputDate);
+    });
+
+    document.getElementById('duration').addEventListener('change', function() {
+      var duration = this.value;
+      var today = new Date();
+
+      if(duration == "1_month"){
+        startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+        endDate = today;
+      } else if(duration == "3_month"){
+        startDate = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
+        endDate = today;
+      } else if(duration == "6_month"){
+        startDate = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate());
+        endDate = today;
+      }
+
+      startDate = formatDate(startDate);
+      endDate = formatDate(endDate);
+
+      // Update the input fields
+      document.getElementById('start-date').value = startDate.split('-').reverse().join('-');
+      document.getElementById('end-date').value = endDate.split('-').reverse().join('-');
+    });
+
+    document.getElementById('bt-submit').addEventListener('click', function() {
+      var category = document.getElementById('category-select').value;
+      var assetGroup = document.getElementById('asset-group-select').value;
+      var assetCategory = document.getElementById('asset-category-select').value;
+      var checkbox = document.getElementById('enable-calendar');
+      if(checkbox.checked){
+        console.log(assetGroup);
+        if (typeof defectcallbackFunction === 'function') {
+           (category, assetGroup, assetCategory, selectedStartDate, selectedEndDate);
+        } else {
+          console.error('handleToggle function is not defined.');
+        }
+      }
+    });
+
+
+    function formatDate(date) {
+      var day = String(date.getDate()).padStart(2, '0');
+      var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      var month = monthNames[date.getMonth()];
+      var year = date.getFullYear();
+      return day + '-' + month + '-' + year;
+    }
+  document.getElementById('bt-submit').addEventListener('click', function() {
+      var category = document.getElementById('category-select').value;
+      var assetGroup = document.getElementById('asset-group-select').value;
+      var assetCategory = document.getElementById('asset-category-select').value;
+      var checkbox = document.getElementById('enable-calendar');
+      if(checkbox.checked){
+        if (typeof defectcallbackFunction === 'function') {
+          defectcallbackFunction(category, assetGroup, assetCategory,selectedStartDate,selectedEndDate);
+        } else {
+          alert ("Function Error");
+        }
+      }else{
+        selectedEndDate = endDate;
+        selectedStartDate = startDate;
+        defectcallbackFunction(category, assetGroup, assetCategory,selectedStartDate,selectedEndDate);
+      }
+      // Event listeners for sidebar date fields
+    document.getElementById('map-start-date').value = selectedStartDate;
+
+          document.getElementById('map-end-date').value = selectedEndDate;
+      
+ 
+
+    // console.log("Selected Start Date:", selectedStartDate);
+    // console.log("Selected End Date:", selectedEndDate);
+    // console.log("Calculated Start Date:", startDate);
+    // console.log("Calculated End Date:", endDate);
+    // console.log("Category:", category);
+    //   console.log("Asset Group:", assetGroup);
+    //   console.log("Asset Category:", assetCategory);
+
+  });
+});
+
+
+</script>
+
+<div class="loading-spinner" id="loadingSpinner">Loading...</div>
+</body>
+</html>
